@@ -1,0 +1,2453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Petualangan Dinamika Gerak Lurus</title>
+  <meta name="description" content="Media ajar fisika SMA berbasis game edukasi petualangan interaktif untuk materi Dinamika Gerak Lurus dan Hukum Newton.">
+  <meta property="og:title" content="Petualangan Dinamika Gerak Lurus">
+  <meta property="og:description" content="Media ajar fisika SMA berbasis game edukasi petualangan interaktif untuk materi Dinamika Gerak Lurus dan Hukum Newton.">
+  <meta property="og:type" content="website">
+  <style>
+    :root {
+      --bg-dark: #0b132b;
+      --bg-card: #1c2541;
+      --bg-card-alt: #233156;
+      --primary: #4cc9f0;
+      --primary-hover: #3aa8cb;
+      --accent: #f72585;
+      --accent-green: #4ade80;
+      --accent-yellow: #fbbf24;
+      --accent-orange: #fb923c;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* HUD Header */
+    header.hud {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11, 19, 43, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid var(--border-color);
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hud-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .hud-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+    }
+
+    .hud-sub {
+      font-size: 0.75rem;
+      color: var(--primary);
+    }
+
+    .hud-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--bg-card);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .hearts {
+      color: var(--accent);
+      letter-spacing: 2px;
+      font-size: 1rem;
+    }
+
+    .xp-badge {
+      color: var(--accent-yellow);
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Standard Interactive Button */
+    .btn {
+      min-height: 48px;
+      min-width: 48px;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+      text-decoration: none;
+      color: white;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #38bdf8, #3b82f6);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #ec4899, #d946ef);
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
+    }
+    .btn-accent:hover {
+      background: linear-gradient(135deg, #f472b6, #e879f9);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-success:hover {
+      background: linear-gradient(135deg, #34d399, #10b981);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background: var(--bg-card);
+      border-color: var(--primary);
+    }
+
+    .btn-icon {
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    /* Main Container */
+    main.container {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Views */
+    .view-screen {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .view-screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Welcome / Hero */
+    .hero-card {
+      background: radial-gradient(circle at top right, #253358, var(--bg-card));
+      border: 2px solid var(--border-color);
+      border-radius: 18px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(76, 201, 240, 0.15);
+      border: 1px solid var(--primary);
+      border-radius: 20px;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff, #7dd3fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 720px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 24px 0 32px;
+      text-align: left;
+    }
+
+    .feature-box {
+      background: var(--bg-dark);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+    .feature-box h4 {
+      color: var(--primary);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+    .feature-box p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    /* Map View */
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .map-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .level-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .level-card.locked {
+      opacity: 0.55;
+      background: #141b2d;
+      border-style: dashed;
+    }
+
+    .level-card.unlocked {
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(76, 201, 240, 0.15);
+    }
+
+    .level-card.completed {
+      border-color: var(--accent-green);
+      background: linear-gradient(180deg, rgba(74, 222, 128, 0.08), var(--bg-card));
+    }
+
+    .level-badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      width: fit-content;
+      margin-bottom: 12px;
+    }
+
+    .status-locked {
+      background: rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+    }
+    .status-unlocked {
+      background: rgba(76, 201, 240, 0.2);
+      color: var(--primary);
+    }
+    .status-completed {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--accent-green);
+    }
+
+    .level-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .level-theme {
+      color: var(--primary);
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .level-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.45;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    /* Gameplay Stage */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--bg-card);
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-pills {
+      display: flex;
+      background: var(--bg-dark);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      min-height: 40px;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #0b132b;
+      font-weight: 700;
+    }
+
+    /* Panel Content */
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Canvas Simulation Box */
+    .sim-wrapper {
+      position: relative;
+      background: #060913;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    canvas.sim-canvas {
+      display: block;
+      width: 100%;
+      height: 280px;
+      background: #080e1e;
+    }
+
+    .sim-overlay-telemetry {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(11, 19, 43, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      line-height: 1.5;
+      pointer-events: none;
+    }
+
+    .sim-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg-card-alt);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 6px;
+      border-radius: 2px;
+    }
+
+    /* Controls Form */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      background: var(--bg-card-alt);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .control-slider {
+      width: 100%;
+      height: 8px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .control-input {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 1rem;
+      min-height: 48px;
+      width: 100%;
+    }
+
+    .control-input:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    /* Step-by-Step Physics Calculation Box */
+    .calc-step-box {
+      background: #0d1629;
+      border-left: 4px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 14px 0;
+      font-family: monospace;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .calc-step-box .highlight {
+      color: var(--accent-yellow);
+      font-weight: 700;
+    }
+
+    /* Question / Challenge Box */
+    .challenge-card {
+      background: linear-gradient(180deg, var(--bg-card-alt), var(--bg-card));
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .challenge-context {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .option-btn {
+      min-height: 48px;
+      padding: 12px 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary);
+      background: #111a30;
+    }
+
+    .option-btn.selected {
+      border-color: var(--primary);
+      background: rgba(76, 201, 240, 0.15);
+    }
+
+    .option-btn.correct {
+      border-color: var(--accent-green);
+      background: rgba(74, 222, 128, 0.2);
+    }
+
+    .option-btn.incorrect {
+      border-color: var(--accent);
+      background: rgba(247, 37, 133, 0.2);
+    }
+
+    /* Feedback Box */
+    .feedback-banner {
+      display: none;
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin-top: 14px;
+    }
+
+    .feedback-success {
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid var(--accent-green);
+      color: #bbf7d0;
+    }
+
+    .feedback-error {
+      background: rgba(247, 37, 133, 0.15);
+      border: 1px solid var(--accent);
+      color: #fbcfe8;
+    }
+
+    /* Concept Explorer Accordion */
+    .concept-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .concept-header {
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: var(--primary);
+      min-height: 48px;
+    }
+
+    .concept-body {
+      padding: 16px 18px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      background: #0d152b;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 18px;
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      animation: popIn 0.25s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 2px solid var(--primary);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 1.6rem;
+      }
+      .hud {
+        padding: 8px 12px;
+      }
+      .hud-title {
+        font-size: 0.95rem;
+      }
+      canvas.sim-canvas {
+        height: 220px;
+      }
+      .btn {
+        padding: 8px 14px;
+        font-size: 0.88rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Game HUD -->
+  <header class="hud" role="banner">
+    <div class="hud-title-group">
+      <div class="hud-icon">⚛</div>
+      <div>
+        <div class="hud-title">Petualangan Dinamika Gerak Lurus</div>
+        <div class="hud-sub" id="hudLevelSubtitle">Peta Misi Utama</div>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="stat-item" title="Sisa Nyawa Petualang">
+        <span>❤️</span>
+        <span class="hearts" id="hudHearts">❤️❤️❤️</span>
+      </div>
+      <div class="stat-item" title="Total Poin Pengalaman (XP)">
+        <span>⭐</span>
+        <span class="xp-badge" id="hudXP">0 XP</span>
+      </div>
+      <div class="stat-item" title="Progres Wilayah Terselesaikan">
+        <span>🚩</span>
+        <span id="hudProgress">0 / 8 Misi</span>
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <button class="btn btn-outline btn-icon" id="btnToggleSound" title="Suara Aktif/Nonaktif">
+        <span id="soundIcon">🔊</span>
+      </button>
+      <button class="btn btn-outline btn-icon" id="btnResetAll" title="Reset Semua Progres">
+        <span>🔄 Reset</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="container">
+
+    <!-- VIEW 1: HERO / WELCOME -->
+    <section id="viewHero" class="view-screen active">
+      <div class="hero-card">
+        <div class="hero-badge">MEDIA AJAR FISIKA SMA / MA — INTERACTIVE FLAT PANEL</div>
+        <h1 class="hero-title">Ekspedisi Pusat Riset Dinamika</h1>
+        <p class="hero-desc">
+          Selamat datang, siswa penjelajah sains! Wilayah riset fisika sedang terkunci akibat ketidakseimbangan gaya. Lewati 8 zona penjelajahan dengan membuktikan konsep inersia, hukum percepatan, aksi-reaksi, gaya normal, gesekan lintasan, dan katrol sebelum membuka Misi Evakuasi Akhir.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-box">
+            <h4>🎯 Simulasi Realistis & Presisi</h4>
+            <p>Eksperimen parameter massa, gaya dorong, sudut miring, dan gesekan dengan diagram benda bebas (FBD) interaktif.</p>
+          </div>
+          <div class="feature-box">
+            <h4>💡 Siklus Prediksi & Solusi</h4>
+            <p>Amati fenomena gerak, rancang hipotesis, verifikasi melalui simulasi gerak, dan selesaikan tantangan HOTS kontekstual.</p>
+          </div>
+          <div class="feature-box">
+            <h4>🛡️ Ramah Sentuh IFP & Mobile</h4>
+            <p>Tombol interaksi lebar, visual vektor berkode warna standar, serta umpan balik berlandaskan konsep fisika akurat (g = 10 m/s²).</p>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="btnStartAdventure" style="min-width: 220px; font-size: 1.1rem;">
+            🚀 Mulai Petualangan
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: MAP / LEVEL SELECTION -->
+    <section id="viewMap" class="view-screen">
+      <div class="map-header">
+        <div>
+          <h2 class="map-title">Peta Ekspedisi Wilayah Newton</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Selesaikan setiap zona secara berurutan untuk membuka gerbang Pusat Riset Dinamika.</p>
+        </div>
+        <div>
+          <button class="btn btn-outline" id="btnBackToHero">Tentang Petualangan</button>
+        </div>
+      </div>
+
+      <div class="map-grid" id="mapGridContainer">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: GAMEPLAY STAGE (LEVEL ACTIVE) -->
+    <section id="viewStage" class="view-screen">
+      <div class="stage-container">
+        
+        <!-- Top bar navigation inside level -->
+        <div class="stage-top-bar">
+          <div>
+            <span style="font-size:0.85rem; color:var(--primary); font-weight:700;" id="stageLevelCode">LEVEL 1</span>
+            <h2 style="font-size:1.3rem; font-weight:800;" id="stageLevelTitle">Kota Inersia</h2>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <div class="tab-pills">
+              <button class="tab-btn active" id="tabBtnConcept">📖 Pelajari</button>
+              <button class="tab-btn" id="tabBtnPredict">🔮 Prediksi</button>
+              <button class="tab-btn" id="tabBtnSim">⚙️ Simulasi & FBD</button>
+              <button class="tab-btn" id="tabBtnChallenge">🏆 Tantangan</button>
+            </div>
+            <button class="btn btn-outline" id="btnReturnToMap">Peta Misi</button>
+          </div>
+        </div>
+
+        <!-- TAB 1: PELAJARI KONSEP -->
+        <div id="tabContentConcept" class="panel-card">
+          <div class="panel-title">
+            <span>📚</span>
+            <span id="conceptTitle">Tujuan & Dasar Konsep</span>
+          </div>
+          <div id="conceptIntroText" style="color:var(--text-main); font-size:0.98rem; line-height:1.6; margin-bottom:16px;">
+            <!-- Content dynamic -->
+          </div>
+          <div id="conceptAccordions">
+            <!-- Accordions dynamic -->
+          </div>
+          <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary" id="btnProceedToPredict">Lanjut ke Prediksi ➡️</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: PREDIKSI HIPOTESIS -->
+        <div id="tabContentPredict" class="panel-card" style="display:none;">
+          <div class="panel-title">
+            <span>🔮</span>
+            <span>Uji Hipotesis & Prediksi Ilmiah</span>
+          </div>
+          <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:14px;">
+            Sebagai fisikawan penjelajah, buatlah dugaan terukur sebelum mengaktifkan mesin laboratorium:
+          </p>
+
+          <div class="challenge-card">
+            <div class="challenge-context" id="predictQuestionText">
+              <!-- dynamic question -->
+            </div>
+            <div class="quiz-options" id="predictOptionsContainer">
+              <!-- dynamic options -->
+            </div>
+          </div>
+
+          <div class="feedback-banner" id="predictFeedback"></div>
+
+          <div style="margin-top:16px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <button class="btn btn-outline" id="btnBackToConcept">⬅️ Kembali ke Konsep</button>
+            <button class="btn btn-primary" id="btnProceedToSim" style="display:none;">Buka Simulasi Laboratorium ➡️</button>
+          </div>
+        </div>
+
+        <!-- TAB 3: SIMULASI & DIAGRAM BENDA BEBAS (FBD) -->
+        <div id="tabContentSim" class="panel-card" style="display:none;">
+          <div class="panel-title">
+            <span>⚙️</span>
+            <span>Simulasi Fisika & Free Body Diagram (FBD)</span>
+          </div>
+
+          <!-- Canvas Simulation Box -->
+          <div class="sim-wrapper">
+            <canvas id="simCanvas" class="sim-canvas"></canvas>
+            <div class="sim-overlay-telemetry" id="simTelemetry">
+              ΣF = 0.0 N<br>
+              a = 0.00 m/s²<br>
+              v = 0.00 m/s<br>
+              s = 0.00 m
+            </div>
+          </div>
+
+          <!-- Vector Legend -->
+          <div class="sim-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background:#ef4444;"></div>
+              <span>Gaya Tarik/Dorong (F)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background:#3b82f6;"></div>
+              <span>Gaya Berat (w = mg)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background:#10b981;"></div>
+              <span>Gaya Normal (N)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background:#f59e0b;"></div>
+              <span>Gaya Gesek (f)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background:#8b5cf6;"></div>
+              <span>Tegangan Tali (T)</span>
+            </div>
+          </div>
+
+          <!-- Controls for current level -->
+          <div class="controls-grid" id="simControlsContainer">
+            <!-- Dynamic sliders & toggles -->
+          </div>
+
+          <!-- Realtime Mathematical Derivation Step -->
+          <div class="calc-step-box" id="simMathStepBox">
+            <!-- Dynamic step-by-step formula evaluation -->
+          </div>
+
+          <!-- Simulation Actions -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-success" id="btnRunSim">▶️ Jalankan Simulasi</button>
+              <button class="btn btn-outline" id="btnResetSim">🔄 Reset Posisi</button>
+            </div>
+            <button class="btn btn-primary" id="btnProceedToChallenge">Menuju Tantangan Soal ➡️</button>
+          </div>
+        </div>
+
+        <!-- TAB 4: TANTANGAN & SOAL HOTS -->
+        <div id="tabContentChallenge" class="panel-card" style="display:none;">
+          <div class="panel-title">
+            <span>🏆</span>
+            <span>Tantangan Evaluasi Penjelajah</span>
+          </div>
+
+          <div class="challenge-card">
+            <div class="challenge-context" id="challengeScenarioText">
+              <!-- Problem context -->
+            </div>
+
+            <!-- Quiz options or input -->
+            <div id="challengeInteractionArea">
+              <!-- dynamic: choices or numeric input -->
+            </div>
+          </div>
+
+          <div class="feedback-banner" id="challengeFeedback"></div>
+
+          <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <button class="btn btn-outline" id="btnBackToSim">⬅️ Cek Simulasi Lagi</button>
+            <button class="btn btn-warning" id="btnShowHint">💡 Bantuan Petunjuk</button>
+            <button class="btn btn-success" id="btnNextLevel" style="display:none;">Misi Berikutnya 🚀</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 4: FINAL RESULT & CERTIFICATE -->
+    <section id="viewFinal" class="view-screen">
+      <div class="hero-card" style="border-color:var(--accent-green);">
+        <div class="hero-badge" style="background:rgba(74,222,128,0.2); border-color:var(--accent-green); color:var(--accent-green);">
+          MISI DINAMIKA GERAK LURUS TUNTAS
+        </div>
+        <h1 class="hero-title">Selamat, Master Dinamika! 🎓</h1>
+        <p class="hero-desc">
+          Kamu telah memecahkan seluruh hukum gerak Newton, gaya kontak, gesekan, bidang miring, sistem katrol, hingga evakuasi kargo laboratorium dengan keakuratan ilmiah tinggi!
+        </p>
+
+        <div style="max-width:500px; margin:0 auto 24px; background:var(--bg-dark); padding:20px; border-radius:14px; border:1px solid var(--border-color); text-align:left;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span>Total Pengalaman Fisika (XP):</span>
+            <strong style="color:var(--accent-yellow);" id="finalScoreXP">0 XP</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span>Status Integritas Nyawa:</span>
+            <strong style="color:var(--accent);" id="finalHearts">3 / 3</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span>Gelar Kehormatan:</span>
+            <strong style="color:var(--primary);" id="finalRankBadge">Master Riset Dinamika</strong>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+          <button class="btn btn-outline" id="btnFinalBackMap">🗺️ Kembali ke Peta Misi</button>
+          <button class="btn btn-primary" id="btnFinalReplay">🔄 Ulangi Seluruh Petualangan</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CONFIRMATION MODAL -->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal-box" role="dialog" aria-modal="true">
+      <div class="modal-header" id="modalTitle">Konfirmasi Tindakan</div>
+      <div class="modal-body" id="modalMessage">Apakah kamu yakin ingin melanjutkan tindakan ini?</div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="btnModalCancel">Batal</button>
+        <button class="btn btn-accent" id="btnModalConfirm">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toastBox">Notifikasi Permainan</div>
+
+  <!-- APP LOGIC & PHYSICS ENGINE -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* --- AUDIO SYNTHESIZER (WEB AUDIO API) --- */
+      let audioCtx = null;
+      let soundEnabled = true;
+
+      function initAudio() {
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+
+      function playSound(type) {
+        if (!soundEnabled) return;
+        try {
+          initAudio();
+          if (!audioCtx) return;
+
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          const now = audioCtx.currentTime;
+
+          if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+          } else if (type === 'success') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(554.37, now + 0.08);
+            osc.frequency.setValueAtTime(659.25, now + 0.16);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+          } else if (type === 'error') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
+          }
+        } catch (e) {
+          // gracefully fallback
+        }
+      }
+
+      /* --- PERSISTENCE & GAME STATE --- */
+      const STORAGE_KEY = 'dinamika_gerak_lurus_v1';
+      const G = 10; // Gravitasi standard 10 m/s^2
+
+      const defaultState = {
+        unlockedLevel: 1,
+        completedLevels: [],
+        currentLevel: 1,
+        xp: 0,
+        hearts: 3,
+        sound: true
+      };
+
+      let gameState = { ...defaultState };
+
+      function loadGame() {
+        try {
+          const data = localStorage.getItem(STORAGE_KEY);
+          if (data) {
+            gameState = Object.assign({}, defaultState, JSON.parse(data));
+          }
+        } catch (e) {
+          gameState = { ...defaultState };
+        }
+        soundEnabled = gameState.sound;
+        updateHUD();
+      }
+
+      function saveGame() {
+        try {
+          gameState.sound = soundEnabled;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+        } catch (e) {}
+        updateHUD();
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toastBox');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
+      }
+
+      function updateHUD() {
+        document.getElementById('hudHearts').textContent = '❤️'.repeat(Math.max(0, gameState.hearts)) + '🖤'.repeat(Math.max(0, 3 - gameState.hearts));
+        document.getElementById('hudXP').textContent = gameState.xp + ' XP';
+        document.getElementById('hudProgress').textContent = `${gameState.completedLevels.length} / 8 Misi`;
+        document.getElementById('soundIcon').textContent = soundEnabled ? '🔊' : '🔇';
+      }
+
+      /* --- LEVELS DATA & PHYSICS DEFINITIONS --- */
+      const levelsData = [
+        {
+          id: 1,
+          code: "LEVEL 1",
+          name: "Kota Inersia",
+          theme: "Hukum I Newton (Kelembaman)",
+          desc: "Sebuah benda akan tetap diam atau bergerak lurus beraturan jika resultan gaya yang bekerja padanya bernilai nol (ΣF = 0).",
+          conceptTitle: "Prinsip Kelembaman (Inersia) Benda",
+          conceptIntro: "Inersia adalah kecenderungan alami setiap benda untuk mempertahankan keadaan geraknya semula. Jika benda sedang diam, ia cenderung ingin tetap diam. Jika benda sedang meluncur dengan kecepatan tetap pada lintasan tanpa gesekan, ia akan terus meluncur lurus selamanya tanpa perlu gaya pendorong terus-menerus.",
+          conceptNotes: [
+            {
+              title: "1. Pernyataan Hukum I Newton",
+              content: "Jika resultan gaya yang bekerja pada suatu benda sama dengan nol (ΣF = 0), maka benda yang mula-mula diam akan tetap diam, dan benda yang mula-mula bergerak akan terus bergerak lurus beraturan (GLB) dengan kecepatan konstan (v = tetap, percepatan a = 0)."
+            },
+            {
+              title: "2. Contoh Nyata dalam Keseharian",
+              content: "Saat mobil tiba-tiba direm mendadak, tubuh penumpang akan terdorong ke depan karena tubuh berusaha mempertahankan keadaan geraknya ke depan. Itulah fungsi penting sabuk pengaman (seatbelt) sebagai penyedia gaya luar untuk mengubah inersia penumpang dengan aman."
+            },
+            {
+              title: "3. Diagram Benda Bebas Kondisi Diam / GLB",
+              content: "Pada bidang datar, gaya berat (w = mg) ke bawah diimbangi sempurna oleh gaya kontak normal dari lantai (N) ke atas sehingga ΣFy = N - w = 0. Jika gaya tarik ke kanan F1 tepat mengimbangi gaya tarik ke kiri F2, maka ΣFx = F1 - F2 = 0."
+            }
+          ],
+          predict: {
+            question: "Sebuah balok riset berada dalam kondisi diam di atas lantai laboratorium licin tanpa gesekan. Jika balok ditarik oleh gaya ke kanan sebesar 40 N dan gaya ke kiri sebesar 40 N secara bersamaan, apa yang akan terjadi pada percepatan balok?",
+            options: [
+              { text: "Balok bergerak dipercepat ke arah kanan karena ditarik 40 N.", correct: false, feedback: "Kurang tepat. Perhatikan bahwa gaya ke kiri juga bernilai 40 N sehingga saling meniadakan." },
+              { text: "Balok tetap diam karena resultan gaya ΣF = 40 N - 40 N = 0 N (a = 0 m/s²).", correct: true, feedback: "Tepat sekali! Karena resultan gaya nol (ΣF = 0), sesuai Hukum I Newton balok akan mempertahankan keadaan diamnya." },
+              { text: "Balok bergetar dan bergerak ke kiri perlahan.", correct: false, feedback: "Tidak tepat. Gaya kedua arah memiliki besar yang sama persis pada garis kerja yang sama." }
+            ]
+          },
+          simConfig: {
+            type: "inertia",
+            params: { mass: 10, fRight: 40, fLeft: 40 },
+            controls: [
+              { id: "fRight", label: "Gaya Kanan (F1)", min: 0, max: 100, step: 5, value: 40, unit: "N" },
+              { id: "fLeft", label: "Gaya Kiri (F2)", min: 0, max: 100, step: 5, value: 40, unit: "N" },
+              { id: "mass", label: "Massa Balok (m)", min: 5, max: 50, step: 5, value: 10, unit: "kg" }
+            ],
+            calc: function(p) {
+              const sigmaF = p.fRight - p.fLeft;
+              const a = sigmaF / p.mass;
+              return {
+                sigmaF: sigmaF,
+                a: a,
+                formula: `ΣF = F₁ - F₂ = ${p.fRight} - ${p.fLeft} = ${sigmaF} N\na = ΣF / m = ${sigmaF} / ${p.mass} = ${a.toFixed(2)} m/s²`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Peti kargo bermassa 15 kg di Kota Inersia ditarik ke kanan dengan gaya F1 = 65 N. Agar kargo tetap mempertahankan status diamnya (inersia) sesuai Hukum I Newton (a = 0 m/s²), berapakah besar gaya penahan F2 yang harus diberikan ke arah kiri?",
+            type: "choice",
+            options: [
+              { text: "0 N (tidak perlu gaya penahan)", correct: false },
+              { text: "65 N ke arah kiri", correct: true },
+              { text: "150 N ke arah bawah", correct: false },
+              { text: "130 N ke arah kiri", correct: false }
+            ],
+            hint: "Syarat Hukum I Newton adalah resultan gaya sama dengan nol: ΣF = F1 - F2 = 0.",
+            explanation: "Benar! Agar resultan gaya ΣF = 0, gaya penahan ke arah kiri harus sama besar dengan gaya tarik ke kanan, yaitu F2 = F1 = 65 N."
+          }
+        },
+        {
+          id: 2,
+          code: "LEVEL 2",
+          name: "Lintasan Percepatan",
+          theme: "Hukum II Newton (ΣF = m · a)",
+          desc: "Percepatan suatu benda berbanding lurus dengan resultan gaya dan berbanding terbalik dengan massa benda.",
+          conceptTitle: "Hubungan Antara Gaya, Massa, dan Percepatan",
+          conceptIntro: "Ketika resultan gaya tidak sama dengan nol (ΣF ≠ 0), keadaan gerak benda akan berubah. Benda akan mengalami percepatan (a). Arah percepatan selalu searah dengan resultan gayanya.",
+          conceptNotes: [
+            {
+              title: "1. Rumus Utama Hukum II Newton",
+              content: "ΣF = m · a  atau  a = ΣF / m.\nSatuan SI: ΣF dalam Newton (N), massa (m) dalam kilogram (kg), dan percepatan (a) dalam m/s²."
+            },
+            {
+              title: "2. Pengaruh Massa dan Gaya",
+              content: "Jika gaya dorong F diperbesar sementara massa tetap, percepatan (a) akan bertambah besar. Sebaliknya, jika muatan kargo ditambah (massa lebih besar) dengan gaya yang sama, percepatannya akan mengecil."
+            }
+          ],
+          predict: {
+            question: "Troli eksperimen bermassa 10 kg didorong dengan gaya tetap 30 N di lantai licin sehingga memiliki percepatan 3 m/s². Jika massa troli dijadikan dua kali lipat (20 kg) sedangkan gaya dorong tetap 30 N, berapakah percepatannya sekarang?",
+            options: [
+              { text: "Percepatan bertambah menjadi 6 m/s².", correct: false, feedback: "Massa berbanding terbalik dengan percepatan. Jika massa naik, percepatan harusnya turun." },
+              { text: "Percepatan berkurang menjadi 1,5 m/s².", correct: true, feedback: "Tepat! a = F / m = 30 / 20 = 1,5 m/s² (setengah dari percepatan semula)." },
+              { text: "Percepatan tetap 3 m/s² karena gaya tidak berubah.", correct: false, feedback: "Salah, percepatan sangat dipengaruhi oleh inersia massa benda." }
+            ]
+          },
+          simConfig: {
+            type: "cart",
+            params: { mass: 10, force: 50 },
+            controls: [
+              { id: "force", label: "Gaya Dorong F", min: 0, max: 200, step: 10, value: 50, unit: "N" },
+              { id: "mass", label: "Massa Troli m", min: 5, max: 50, step: 5, value: 10, unit: "kg" }
+            ],
+            calc: function(p) {
+              const a = p.force / p.mass;
+              return {
+                sigmaF: p.force,
+                a: a,
+                formula: `ΣF = ${p.force} N\na = ΣF / m = ${p.force} / ${p.mass} = ${a.toFixed(2)} m/s²`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Pintu gerbang penelitian hanya terbuka jika troli bermassa 25 kg dapat meluncur dengan percepatan tepat a = 3 m/s² di atas lintasan licin. Tentukan besar gaya dorong F yang harus disalurkan ke troli tersebut!",
+            type: "numeric",
+            correctValue: 75,
+            unit: "N",
+            hint: "Gunakan persamaan Hukum II Newton: F = m · a.",
+            explanation: "Tepat sekali! F = m · a = 25 kg × 3 m/s² = 75 N. Gerbang penelitian kini terbuka lebar!"
+          }
+        },
+        {
+          id: 3,
+          code: "LEVEL 3",
+          name: "Jembatan Aksi–Reaksi",
+          theme: "Hukum III Newton (F aksi = - F reaksi)",
+          desc: "Setiap ada gaya aksi pada suatu benda, selalu ada gaya reaksi yang sama besar dan berlawanan arah pada benda lainnya.",
+          conceptTitle: "Sifat Hakiki Pasangan Gaya Aksi-Reaksi",
+          conceptIntro: "Gaya di alam semesta selalu muncul berpasangan. Tidak pernah ada gaya tunggal yang terisolasi. Ketika kamu menekan lantai ke bawah, lantai membalas dengan mendorong kakimu ke atas dengan besar yang persis sama.",
+          conceptNotes: [
+            {
+              title: "1. Karakteristik Mutlak Pasangan Aksi-Reaksi",
+              content: "a) Besarnya selalu sama rata (F aksi = F reaksi).\nb) Arahnya berlawanan.\nc) Bekerja pada DUA BENDA YANG BERBEDA sehingga gaya aksi dan reaksi TIDAK PERNAH saling meniadakan dalam satu benda."
+            },
+            {
+              title: "2. Miskonsepsi Sering Terjadi: W dan N",
+              content: "Gaya berat balok (w) dan gaya normal dari meja (N) BUKAN pasangan aksi-reaksi! Keduanya bekerja pada benda yang sama (balok) dan penyebab gayanya berbeda (w oleh gravitasi bumi, N oleh kontak elastis permukaan meja)."
+            }
+          ],
+          predict: {
+            question: "Seorang astronot di stasiun antariksa mendorong satelit kecil seberat 50 kg dengan gaya 100 N ke depan. Apa gaya yang dialami astronot tersebut?",
+            options: [
+              { text: "Astronot tidak merasakan gaya karena ruang hampa.", correct: false, feedback: "Hukum III Newton berlaku universal di segala tempat, termasuk ruang hampa." },
+              { text: "Astronot terdorong ke belakang dengan gaya reaksi persis 100 N.", correct: true, feedback: "Luar biasa! Gaya reaksi yang diterima astronot sama besar yaitu 100 N ke arah berlawanan." },
+              { text: "Astronot terdorong ke belakang dengan gaya hanya 50 N sesuai massa satelit.", correct: false, feedback: "Besar gaya aksi dan reaksi selalu sama besar, terlepas dari perbedaan massa benda." }
+            ]
+          },
+          simConfig: {
+            type: "actionReaction",
+            params: { pushForce: 60, m1: 60, m2: 40 },
+            controls: [
+              { id: "pushForce", label: "Gaya Interaksi Dorong", min: 10, max: 150, step: 10, value: 60, unit: "N" },
+              { id: "m1", label: "Massa Orang 1", min: 30, max: 80, step: 5, value: 60, unit: "kg" },
+              { id: "m2", label: "Massa Orang 2", min: 20, max: 70, step: 5, value: 40, unit: "kg" }
+            ],
+            calc: function(p) {
+              const a1 = -p.pushForce / p.m1;
+              const a2 = p.pushForce / p.m2;
+              return {
+                sigmaF: p.pushForce,
+                a: a2,
+                formula: `F aksi = ${p.pushForce} N (pada Orang 2)  ->  a₂ = +${a2.toFixed(2)} m/s²\nF reaksi = -${p.pushForce} N (pada Orang 1) -> a₁ = ${a1.toFixed(2)} m/s²`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Manakah pasangan gaya berikut yang merupakan PASANGAN AKSI-REAKSI menurut Hukum III Newton yang sesungguhnya?",
+            type: "choice",
+            options: [
+              { text: "Gaya berat apel ke bawah dan gaya normal meja yang menahan apel ke atas.", correct: false },
+              { text: "Gaya dorong kaki perenang ke air ke belakang dan gaya dorong air ke tubuh perenang ke depan.", correct: true },
+              { text: "Gaya gesek kinetis dan gaya dorong mesin pada mobil yang sama.", correct: false },
+              { text: "Gaya gravitasi bulan dan kecepatan orbit satelit mengelilingi bumi.", correct: false }
+            ],
+            hint: "Pasangan aksi reaksi harus terjadi pada dua objek yang saling berinteraksi bolak-balik (Perenang mendorong air <-> air mendorong perenang).",
+            explanation: "Tepat sekali! Perenang memberikan gaya aksi ke air ke belakang, dan air memberikan gaya reaksi ke tubuh perenang ke depan. Bekerja pada 2 benda berlainan."
+          }
+        },
+        {
+          id: 4,
+          code: "LEVEL 4",
+          name: "Lembah Gravitasi",
+          theme: "Gaya Berat (w = mg) dan Gaya Normal (N)",
+          desc: "Gaya berat dipengaruhi gravitasi bumi, sedangkan gaya normal adalah gaya desakan kontak tegak lurus permukaan.",
+          conceptTitle: "Gaya Berat dan Desakan Normal pada Bidang Datar & Lift",
+          conceptIntro: "Massa adalah ukuran kuantitas materi benda (tetap di mana pun), sedangkan berat adalah gaya tarik gravitasi bumi terhadap massa tersebut (w = m · g, g = 10 m/s²). Gaya Normal (N) muncul sebagai reaksi elastis permukaan saat bersentuhan tegak lurus.",
+          conceptNotes: [
+            {
+              title: "1. Kondisi Bidang Datar Diam",
+              content: "Pada bidang horizontal tanpa gaya luar vertikal: ΣFy = 0  =>  N - w = 0  =>  N = w = m · g."
+            },
+            {
+              title: "2. Dinamika di dalam Lift Bergerak",
+              content: "Jika lift bergerak ke atas dipercepat dengan percepatan a:\nΣFy = m · a  =>  N - w = m · a  =>  N = m(g + a)  (Tubuh terasa lebih berat!)\nJika lift bergerak ke bawah dipercepat:\nΣFy = m · a  =>  w - N = m · a  =>  N = m(g - a)  (Tubuh terasa lebih ringan)."
+            }
+          ],
+          predict: {
+            question: "Seorang siswa bermassa 50 kg menaiki timbangan di dalam lift. Lift bergerak naik ke atas dengan percepatan 2 m/s² (g = 10 m/s²). Berapakah gaya tekan normal (angka yang ditunjukkan timbangan)?",
+            options: [
+              { text: "500 N (sama seperti saat lift diam)", correct: false, feedback: "Saat lift dipercepat ke atas, timbangan harus mendorong lebih kuat untuk menopang percepatan tubuh." },
+              { text: "600 N", correct: true, feedback: "Tepat! N = m(g + a) = 50(10 + 2) = 50 × 12 = 600 N." },
+              { text: "400 N", correct: false, feedback: "400 N terjadi jika lift mengalami percepatan turun ke bawah." }
+            ]
+          },
+          simConfig: {
+            type: "elevator",
+            params: { mass: 40, liftAcc: 2 },
+            controls: [
+              { id: "mass", label: "Massa Muatan (kg)", min: 10, max: 100, step: 5, value: 40, unit: "kg" },
+              { id: "liftAcc", label: "Percepatan Lift (+naik / -turun)", min: -6, max: 6, step: 1, value: 2, unit: "m/s²" }
+            ],
+            calc: function(p) {
+              const w = p.mass * G;
+              const n = p.mass * (G + p.liftAcc);
+              return {
+                sigmaF: p.mass * p.liftAcc,
+                a: p.liftAcc,
+                formula: `w = m · g = ${p.mass} × 10 = ${w} N\nN = m(g + a) = ${p.mass}(10 + (${p.liftAcc})) = ${n.toFixed(0)} N`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Sebuah balok riset bermassa 8 kg diletakkan di atas lantai mendatar. Dari atas, balok tersebut ditekan secara vertikal ke bawah dengan gaya tekan tambahan F_tekan = 30 N (g = 10 m/s²). Hitunglah besar gaya normal N yang dikerjakan lantai pada balok!",
+            type: "numeric",
+            correctValue: 110,
+            unit: "N",
+            hint: "Tinjau sumbu vertikal: ΣFy = 0 -> N - w - F_tekan = 0 -> N = w + F_tekan.",
+            explanation: "Hebat! w = 8 × 10 = 80 N. Karena ada tekanan ke bawah 30 N, maka lantai harus menahan total: N = 80 + 30 = 110 N."
+          }
+        },
+        {
+          id: 5,
+          code: "LEVEL 5",
+          name: "Jalur Licin dan Kasar",
+          theme: "Gaya Gesek Statis dan Kinetis",
+          desc: "Gaya gesek timbul dari interaksi mikroskopis permukaan kontak dan selalu menghambat kecenderungan gerak benda.",
+          conceptTitle: "Batas Gesek Statis Maksimum & Gesek Kinetis",
+          conceptIntro: "Gaya gesek statis (fs) bekerja saat benda masih diam dan besarnya menyesuaikan gaya dorong luar sampai batas maksimum: fs_maks = μs · N. Jika gaya dorong F > fs_maks, benda bergerak dan gaya hambat berganti menjadi gaya gesek kinetis: fk = μk · N (dengan μk < μs).",
+          conceptNotes: [
+            {
+              title: "1. Kapan Benda Bergerak?",
+              content: "a) Jika F ≤ fs_maks: Benda tetap DIAM, percepatan a = 0, dan gaya gesek statis fs = F.\nb) Jika F > fs_maks: Benda BERGERAK, gaya gesek yang bekerja adalah fk = μk · N, dan percepatannya a = (F - fk) / m."
+            },
+            {
+              title: "2. Nilai Koefisien Gesek",
+              content: "Koefisien gesek μ bergantung pada kekasaran permukaan kedua benda. Koefisien statis (μs) selalu lebih besar atau sama dengan koefisien kinetis (μk)."
+            }
+          ],
+          predict: {
+            question: "Balok bermassa 10 kg berada di lantai kasar dengan koefisien gesek statis μs = 0,4 dan kinetis μk = 0,2 (g = 10 m/s²). Benda didorong dengan gaya F = 30 N. Berapakah besar gaya gesek yang bekerja?",
+            options: [
+              { text: "Gaya gesek = 40 N dan benda terdorong mundur.", correct: false, feedback: "Gaya gesek adalah gaya pasif penghambat, ia tidak pernah mendorong balik benda sendiri." },
+              { text: "Gaya gesek = 30 N dan balok tetap diam.", correct: true, feedback: "Tepat! fs_maks = 0,4 × (10×10) = 40 N. Karena dorongan F = 30 N < 40 N, benda diam dan fs mengimbangi tepat sebesar 30 N." },
+              { text: "Gaya gesek = 20 N dan balok meluncur kencang.", correct: false, feedback: "Gesek kinetis 20 N hanya aktif jika benda sudah berhasil melampaui fs_maks (40 N)." }
+            ]
+          },
+          simConfig: {
+            type: "friction",
+            params: { mass: 10, fPush: 50, mus: 0.4, muk: 0.2 },
+            controls: [
+              { id: "fPush", label: "Gaya Dorong F", min: 0, max: 120, step: 5, value: 50, unit: "N" },
+              { id: "mass", label: "Massa Peti", min: 5, max: 40, step: 5, value: 10, unit: "kg" },
+              { id: "mus", label: "Koefisien Statis (μs)", min: 0.1, max: 0.8, step: 0.05, value: 0.4, unit: "" },
+              { id: "muk", label: "Koefisien Kinetis (μk)", min: 0.05, max: 0.6, step: 0.05, value: 0.2, unit: "" }
+            ],
+            calc: function(p) {
+              const N = p.mass * G;
+              const fsMaks = p.mus * N;
+              let isMoving = p.fPush > fsMaks;
+              let fFric = isMoving ? p.muk * N : p.fPush;
+              let sigmaF = isMoving ? p.fPush - fFric : 0;
+              let a = isMoving ? sigmaF / p.mass : 0;
+
+              return {
+                sigmaF: sigmaF,
+                a: a,
+                formula: `N = m · g = ${N} N | fs_maks = μs · N = ${fsMaks.toFixed(1)} N\nStatus: ${isMoving ? 'BERGERAK' : 'DIAM'}\nf = ${fFric.toFixed(1)} N | a = ${a.toFixed(2)} m/s²`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Peti perbekalan bermassa 20 kg diletakkan pada jalan kasar dengan μs = 0,5 dan μk = 0,3 (g = 10 m/s²). Peti didorong dengan gaya F = 140 N. Berapakah percepatan gerak peti tersebut?",
+            type: "numeric",
+            correctValue: 4,
+            unit: "m/s²",
+            hint: "Langkah: 1) N = 200 N. 2) fs_maks = 0,5 × 200 = 100 N. Karena F (140 N) > 100 N, benda meluncur. 3) fk = 0,3 × 200 = 60 N. 4) a = (140 - 60) / 20.",
+            explanation: "Sempurna! ΣF = F - fk = 140 N - 60 N = 80 N. Maka a = 80 / 20 = 4 m/s²."
+          }
+        },
+        {
+          id: 6,
+          code: "LEVEL 6",
+          name: "Pendakian Newton",
+          theme: "Dinamika Bidang Miring",
+          desc: "Gaya gravitasi diuraikan menjadi komponen sejajar kemiringan (mg sin θ) dan tegak lurus bidang (mg cos θ).",
+          conceptTitle: "Analisis Vektor Benda Bebas pada Kemiringan",
+          conceptIntro: "Pada lereng dengan sudut kemiringan θ terhadap horizontal, orientasi sumbu acuan diputar: sumbu-x sejajar bidang miring dan sumbu-y tegak lurus bidang miring.",
+          conceptNotes: [
+            {
+              title: "1. Penguraian Komponen Berat",
+              content: "• Komponen tegak lurus: wy = mg cos θ (diimbangi oleh gaya normal N = mg cos θ).\n• Komponen peluncur sejajar bidang: wx = mg sin θ (menarik benda meluncur turun)."
+            },
+            {
+              title: "2. Hukum II Newton pada Bidang Miring Licin",
+              content: "Jika tanpa gesekan dan dilepas bebas meluncur turun:\nΣFx = mg sin θ = m · a  =>  a = g sin θ.\nPercepatan murni ditentukan oleh sudut kemiringan θ!"
+            }
+          ],
+          predict: {
+            question: "Sebuah balok meluncur bebas menuruni bidang miring licin bersudut θ = 30° (g = 10 m/s², sin 30° = 0,5, cos 30° = 0,866). Berapakah percepatan meluncurnya?",
+            options: [
+              { text: "10 m/s² (sama seperti jatuh bebas vertikal)", correct: false, feedback: "Pada bidang miring, gaya yang mempercepat hanyalah komponen mg sin θ." },
+              { text: "5 m/s²", correct: true, feedback: "Tepat sekali! a = g sin 30° = 10 × 0,5 = 5 m/s²." },
+              { text: "8,66 m/s²", correct: false, feedback: "Nilai tersebut adalah g cos 30°, komponen gaya penekan normal." }
+            ]
+          },
+          simConfig: {
+            type: "incline",
+            params: { mass: 10, angleDeg: 30, mu: 0.1 },
+            controls: [
+              { id: "angleDeg", label: "Sudut Kemiringan (θ°)", min: 0, max: 60, step: 5, value: 30, unit: "°" },
+              { id: "mass", label: "Massa Kargo", min: 5, max: 30, step: 5, value: 10, unit: "kg" },
+              { id: "mu", label: "Koefisien Gesek (μ)", min: 0, max: 0.5, step: 0.05, value: 0.1, unit: "" }
+            ],
+            calc: function(p) {
+              const rad = p.angleDeg * Math.PI / 180;
+              const sinVal = Math.sin(rad);
+              const cosVal = Math.cos(rad);
+              const mg = p.mass * G;
+              const wx = mg * sinVal;
+              const wy = mg * cosVal;
+              const N = wy;
+              const f = p.mu * N;
+              const sigmaF = wx - f;
+              const a = Math.max(0, sigmaF / p.mass);
+
+              return {
+                sigmaF: sigmaF,
+                a: a,
+                formula: `wx = mg sin θ = ${wx.toFixed(1)} N | N = wy = mg cos θ = ${N.toFixed(1)} N\nGesek f = μN = ${f.toFixed(1)} N | a = (${wx.toFixed(1)} - ${f.toFixed(1)}) / ${p.mass} = ${a.toFixed(2)} m/s²`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Sebuah peti bermassa 10 kg berada pada bidang miring kasar 37° (sin 37° = 0,6; cos 37° = 0,8; g = 10 m/s²). Koefisien gesek kinetis antara peti dan bidang miring adalah μk = 0,25. Berapakah percepatan balok saat meluncur ke bawah?",
+            type: "numeric",
+            correctValue: 4,
+            unit: "m/s²",
+            hint: "1) wx = 10 × 10 × 0,6 = 60 N. 2) N = 10 × 10 × 0,8 = 80 N. 3) fk = 0,25 × 80 = 20 N. 4) a = (60 - 20) / 10.",
+            explanation: "Hebat! Gaya pendorong turun wx = 60 N, gaya gesek penahan fk = 20 N. Resultan gaya = 40 N. Maka a = 40 / 10 = 4 m/s²."
+          }
+        },
+        {
+          id: 7,
+          code: "LEVEL 7",
+          name: "Tambang Katrol",
+          theme: "Sistem Katrol & Benda Terhubung Tali",
+          desc: "Pada katrol ideal tanpa massa dan tanpa gesekan, tegangan tali (T) bernilai sama di sepanjang kawat penghubung kedua benda.",
+          conceptTitle: "Dinamika Katrol Meja dan Pesawat Atwood",
+          conceptIntro: "Sistem benda terhubung bergerak dengan percepatan bersama (a). Untuk menganalisisnya, buat diagram benda bebas terpisah untuk benda 1 dan benda 2, kemudian gabungkan persamaannya.",
+          conceptNotes: [
+            {
+              title: "1. Balok di Meja Licin (m1) ditarik Balok Gantung (m2)",
+              content: "Benda 1 di meja licin: ΣFx = T = m1 · a\nBenda 2 menggantung bebas: ΣFy = m2 · g - T = m2 · a\nMenjumlahkan kedua persamaan: m2 · g = (m1 + m2) · a\n=> a = (m2 · g) / (m1 + m2)."
+            },
+            {
+              title: "2. Menentukan Tegangan Tali (T)",
+              content: "Setelah percepatan (a) didapat, substitusikan ke persamaan salah satu balok: T = m1 · a."
+            }
+          ],
+          predict: {
+            question: "Balok meja bermassa m1 = 3 kg dihubungkan melalui katrol licin dengan balok gantung m2 = 2 kg (g = 10 m/s²). Meja licin tanpa gesekan. Berapakah percepatan sistem gerak tersebut?",
+            options: [
+              { text: "10 m/s²", correct: false, feedback: "Percepatan 10 m/s² hanya terjadi pada benda jatuh bebas tanpa terikat benda lain." },
+              { text: "4 m/s²", correct: true, feedback: "Tepat! a = (m2 · g) / (m1 + m2) = (2 × 10) / (3 + 2) = 20 / 5 = 4 m/s²." },
+              { text: "6,67 m/s²", correct: false, feedback: "Periksa kembali pembagian dengan massa total kedua benda (m1 + m2 = 5 kg)." }
+            ]
+          },
+          simConfig: {
+            type: "pulley",
+            params: { m1: 6, m2: 4 },
+            controls: [
+              { id: "m1", label: "Massa Balok Meja m1 (kg)", min: 2, max: 20, step: 1, value: 6, unit: "kg" },
+              { id: "m2", label: "Massa Balok Gantung m2 (kg)", min: 1, max: 15, step: 1, value: 4, unit: "kg" }
+            ],
+            calc: function(p) {
+              const totalM = p.m1 + p.m2;
+              const w2 = p.m2 * G;
+              const a = w2 / totalM;
+              const T = p.m1 * a;
+              return {
+                sigmaF: w2,
+                a: a,
+                formula: `Gaya Penggerak = w₂ = ${w2} N\nMassa Total = ${totalM} kg\na = ${w2} / ${totalM} = ${a.toFixed(2)} m/s² | Tegangan Tali T = ${T.toFixed(2)} N`
+              };
+            }
+          },
+          challenge: {
+            scenario: "Pada sistem katrol tambang, balok meja m1 = 7 kg dihubungkan tali dengan balok gantung m2 = 3 kg di atas meja licin (g = 10 m/s²). Hitunglah besar TEGANGAN TALI (T) yang menghubungkan kedua balok!",
+            type: "numeric",
+            correctValue: 21,
+            unit: "N",
+            hint: "Langkah 1: a = (3 × 10) / (7 + 3) = 30 / 10 = 3 m/s². Langkah 2: T = m1 · a = 7 × 3 N.",
+            explanation: "Sangat brilian! Percepatan a = 3 m/s². Tegangan tali T = m1 × a = 7 kg × 3 m/s² = 21 N (atau T = m2(g - a) = 3(10 - 3) = 21 N)."
+          }
+        },
+        {
+          id: 8,
+          code: "LEVEL FINAL",
+          name: "Misi Dinamika",
+          theme: "Evakuasi Laboratorium Newton",
+          desc: "Kombinasi komprehensif: integrasikan Hukum II Newton, resultan gaya gesek, lereng kemiringan, dan katrol penyelamat!",
+          conceptTitle: "Sintesis Menyeluruh Dinamika Gerak Lurus",
+          conceptIntro: "Ini adalah gerbang akhir riset dinamika! Sebuah kapsul kargo riset berharga harus ditarik menyeberangi pos evakuasi bertingkat sebelum generator padam. Kecepatan dan akselerasi harus dikalkulasi secara presisi.",
+          conceptNotes: [
+            {
+              title: "1. Panduan Prosedur Evakuasi",
+              content: "Kargo (m = 50 kg) harus dievakuasi melalui lintasan datar bergesekan (μk = 0,2) dengan percepatan aman yang ditentukan sistem. Kamu harus memadukan rumus ΣF = m · a dan fk = μk · N."
+            },
+            {
+              title: "2. Evaluasi Resultan Menyeluruh",
+              content: "ΣF = F_tarik - fk = m · a\nF_tarik = (m · a) + fk = (m · a) + (μk · m · g)."
+            }
+          ],
+          predict: {
+            question: "Jika sebuah kargo bermassa 50 kg di atas lantai kasar (μk = 0,2; g = 10 m/s²) harus memiliki percepatan gerak 1,5 m/s², apakah gaya tarik sebesar 100 N mencukupi?",
+            options: [
+              { text: "Cukup, karena 100 N sudah melampaui gaya gesek 50 N.", correct: false, feedback: "Hitung gaya gesek yang benar: fk = 0,2 × (50 × 10) = 100 N. Gaya tarik 100 N hanya menghasilkan a = 0." },
+              { text: "Tidak cukup. Gaya tarik 100 N tepat sama dengan gaya gesek (fk = 100 N), sehingga percepatan a = 0 m/s².", correct: true, feedback: "Tepat sekali! fk = 0,2 × 500 = 100 N. Gaya 100 N hanya mengimbangi gesekan tanpa menghasilkan percepatan." },
+              { text: "Cukup dan percepatannya melebihi 3 m/s².", correct: false, feedback: "Kalkulasi tidak akurat." }
+            ]
+          },
+          simConfig: {
+            type: "finalBoss",
+            params: { mass: 50, force: 175, mu: 0.2 },
+            controls: [
+              { id: "force", label: "Daya Tarik Generator F (N)", min: 100, max: 350, step: 25, value: 175, unit: "N" },
+              { id: "mu", label: "Pelumas Lintasan (μk)", min: 0.05, max: 0.4, step: 0.05, value: 0.2, unit: "" }
+            ],
+            calc: function(p) {
+              const N = p.mass * G;
+              const fk = p.mu * N;
+              const sigmaF = p.force - fk;
+              const a = Math.max(0, sigmaF / p.mass);
+              return {
+                sigmaF: sigmaF,
+                a: a,
+                formula: `Berat w = ${p.mass * G} N | Gesek fk = ${p.mu} × ${N} = ${fk.toFixed(0)} N\nΣF = ${p.force} - ${fk.toFixed(0)} = ${sigmaF.toFixed(0)} N\na = ${sigmaF.toFixed(0)} / ${p.mass} = ${a.toFixed(2)} m/s²`
+              };
+            }
+          },
+          challenge: {
+            scenario: "MISI EVAKUASI AKHIR: Kapsul laboratorium bermassa m = 50 kg harus ditarik pada jalur evakuasi (μk = 0,25 dan g = 10 m/s²) dengan percepatan tepat a = 2 m/s² agar selamat tepat waktu sebelum reaktor terkunci. Tentukan besar GAYA TARIK MINIMUM F yang harus disetel pada kerekan!",
+            type: "numeric",
+            correctValue: 225,
+            unit: "N",
+            hint: "1) N = 50 × 10 = 500 N. 2) fk = 0,25 × 500 = 125 N. 3) ΣF = m · a = 50 × 2 = 100 N. 4) F = ΣF + fk.",
+            explanation: "LUAR BIASA! F - fk = m · a -> F - 125 = 100 -> F = 225 N! Kapsul berhasil diselamatkan dan seluruh misi riset dinamika tuntas sempurna!"
+          }
+        }
+      ];
+
+      /* --- CURRENT STAGE STATE --- */
+      let currentLevelData = levelsData[0];
+      let simAnimationId = null;
+      let simTime = 0;
+      let simRunning = false;
+      let simPositionX = 30; // in canvas coordinate
+      let simSpeed = 0;
+      let selectedPredictIndex = null;
+
+      /* --- DOM ELEMENTS --- */
+      const viewHero = document.getElementById('viewHero');
+      const viewMap = document.getElementById('viewMap');
+      const viewStage = document.getElementById('viewStage');
+      const viewFinal = document.getElementById('viewFinal');
+
+      const simCanvas = document.getElementById('simCanvas');
+      const simCtx = simCanvas.getContext('2d');
+
+      /* --- ROUTING / SCREEN SWITCHER --- */
+      function switchView(viewName) {
+        playSound('click');
+        [viewHero, viewMap, viewStage, viewFinal].forEach(v => v.classList.remove('active'));
+        if (viewName === 'hero') viewHero.classList.add('active');
+        if (viewName === 'map') {
+          renderMap();
+          viewMap.classList.add('active');
+        }
+        if (viewName === 'stage') viewStage.classList.add('active');
+        if (viewName === 'final') {
+          renderFinalScreen();
+          viewFinal.classList.add('active');
+        }
+      }
+
+      /* --- MAP RENDERER --- */
+      function renderMap() {
+        const container = document.getElementById('mapGridContainer');
+        container.innerHTML = '';
+
+        levelsData.forEach(lvl => {
+          const isUnlocked = lvl.id <= gameState.unlockedLevel;
+          const isCompleted = gameState.completedLevels.includes(lvl.id);
+
+          const card = document.createElement('div');
+          card.className = `level-card ${isCompleted ? 'completed' : isUnlocked ? 'unlocked' : 'locked'}`;
+
+          let statusClass = 'status-locked';
+          let statusText = '🔒 Terkunci';
+          if (isCompleted) {
+            statusClass = 'status-completed';
+            statusText = '✅ Selesai';
+          } else if (isUnlocked) {
+            statusClass = 'status-unlocked';
+            statusText = '⭐ Terbuka';
+          }
+
+          card.innerHTML = `
+            <div>
+              <div class="level-badge-status ${statusClass}">${statusText}</div>
+              <div style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">${lvl.code}</div>
+              <h3 class="level-name">${lvl.name}</h3>
+              <div class="level-theme">${lvl.theme}</div>
+              <p class="level-desc">${lvl.desc}</p>
+            </div>
+            <button class="btn ${isCompleted ? 'btn-outline' : isUnlocked ? 'btn-primary' : 'btn-outline'}" 
+              ${!isUnlocked ? 'disabled' : ''} style="width:100%; margin-top:8px;">
+              ${isCompleted ? '🔄 Masuki Kembali' : isUnlocked ? '🚀 Jalankan Misi' : '🔒 Belum Terbuka'}
+            </button>
+          `;
+
+          if (isUnlocked) {
+            card.querySelector('button').addEventListener('click', () => {
+              openLevel(lvl.id);
+            });
+          }
+
+          container.appendChild(card);
+        });
+
+        document.getElementById('hudLevelSubtitle').textContent = 'Peta Misi Utama';
+      }
+
+      /* --- OPEN LEVEL --- */
+      function openLevel(levelId) {
+        currentLevelData = levelsData.find(l => l.id === levelId) || levelsData[0];
+        gameState.currentLevel = levelId;
+        saveGame();
+
+        document.getElementById('hudLevelSubtitle').textContent = `${currentLevelData.code}: ${currentLevelData.name}`;
+        document.getElementById('stageLevelCode').textContent = currentLevelData.code;
+        document.getElementById('stageLevelTitle').textContent = currentLevelData.name;
+
+        // Render Concept
+        document.getElementById('conceptTitle').textContent = currentLevelData.conceptTitle;
+        document.getElementById('conceptIntroText').textContent = currentLevelData.conceptIntro;
+
+        const accContainer = document.getElementById('conceptAccordions');
+        accContainer.innerHTML = '';
+        currentLevelData.conceptNotes.forEach((n, idx) => {
+          const acc = document.createElement('div');
+          acc.className = 'concept-card';
+          acc.innerHTML = `
+            <div class="concept-header">
+              <span>${n.title}</span>
+              <span>▼</span>
+            </div>
+            <div class="concept-body" style="${idx === 0 ? '' : 'display:none;'}">${n.content.replace(/\n/g, '<br>')}</div>
+          `;
+          acc.querySelector('.concept-header').addEventListener('click', function() {
+            const body = acc.querySelector('.concept-body');
+            const isOpen = body.style.display !== 'none';
+            body.style.display = isOpen ? 'none' : 'block';
+            this.querySelector('span:last-child').textContent = isOpen ? '▼' : '▲';
+          });
+          accContainer.appendChild(acc);
+        });
+
+        // Render Predict
+        renderPredictSection();
+
+        // Render Simulation Controls
+        renderSimulationControls();
+        resetSimPosition();
+
+        // Render Challenge
+        renderChallengeSection();
+
+        // Switch to default tab: Concept
+        activateStageTab('concept');
+        switchView('stage');
+      }
+
+      /* --- TAB SWITCHER --- */
+      const tabs = {
+        concept: { btn: document.getElementById('tabBtnConcept'), content: document.getElementById('tabContentConcept') },
+        predict: { btn: document.getElementById('tabBtnPredict'), content: document.getElementById('tabContentPredict') },
+        sim: { btn: document.getElementById('tabBtnSim'), content: document.getElementById('tabContentSim') },
+        challenge: { btn: document.getElementById('tabBtnChallenge'), content: document.getElementById('tabContentChallenge') }
+      };
+
+      function activateStageTab(tabKey) {
+        playSound('click');
+        Object.keys(tabs).forEach(k => {
+          tabs[k].btn.classList.remove('active');
+          tabs[k].content.style.display = 'none';
+        });
+        if (tabs[tabKey]) {
+          tabs[tabKey].btn.classList.add('active');
+          tabs[tabKey].content.style.display = 'block';
+        }
+
+        if (tabKey === 'sim') {
+          resizeCanvas();
+          updateSimCalculation();
+        }
+      }
+
+      tabs.concept.btn.addEventListener('click', () => activateStageTab('concept'));
+      tabs.predict.btn.addEventListener('click', () => activateStageTab('predict'));
+      tabs.sim.btn.addEventListener('click', () => activateStageTab('sim'));
+      tabs.challenge.btn.addEventListener('click', () => activateStageTab('challenge'));
+
+      document.getElementById('btnProceedToPredict').addEventListener('click', () => activateStageTab('predict'));
+      document.getElementById('btnBackToConcept').addEventListener('click', () => activateStageTab('concept'));
+      document.getElementById('btnProceedToSim').addEventListener('click', () => activateStageTab('sim'));
+      document.getElementById('btnBackToSim').addEventListener('click', () => activateStageTab('sim'));
+      document.getElementById('btnProceedToChallenge').addEventListener('click', () => activateStageTab('challenge'));
+
+      /* --- PREDICT LOGIC --- */
+      function renderPredictSection() {
+        const p = currentLevelData.predict;
+        document.getElementById('predictQuestionText').textContent = p.question;
+        const optContainer = document.getElementById('predictOptionsContainer');
+        optContainer.innerHTML = '';
+        selectedPredictIndex = null;
+
+        const fb = document.getElementById('predictFeedback');
+        fb.style.display = 'none';
+        document.getElementById('btnProceedToSim').style.display = 'none';
+
+        p.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.innerHTML = `<span style="font-weight:700; color:var(--primary);">${String.fromCharCode(65 + idx)}.</span> <span>${opt.text}</span>`;
+          btn.addEventListener('click', () => {
+            selectPredictOption(idx);
+          });
+          optContainer.appendChild(btn);
+        });
+      }
+
+      function selectPredictOption(idx) {
+        const p = currentLevelData.predict;
+        const opt = p.options[idx];
+        const buttons = document.querySelectorAll('#predictOptionsContainer .option-btn');
+        buttons.forEach((b, i) => {
+          b.className = 'option-btn';
+          if (i === idx) {
+            b.classList.add(opt.correct ? 'correct' : 'incorrect');
+          }
+        });
+
+        const fb = document.getElementById('predictFeedback');
+        fb.style.display = 'block';
+        fb.className = `feedback-banner ${opt.correct ? 'feedback-success' : 'feedback-error'}`;
+        fb.textContent = opt.feedback;
+
+        if (opt.correct) {
+          playSound('success');
+          document.getElementById('btnProceedToSim').style.display = 'inline-flex';
+        } else {
+          playSound('error');
+        }
+      }
+
+      /* --- SIMULATION & CANVAS ENGINE --- */
+      function resizeCanvas() {
+        const rect = simCanvas.parentElement.getBoundingClientRect();
+        simCanvas.width = rect.width;
+        simCanvas.height = 280;
+      }
+
+      window.addEventListener('resize', () => {
+        if (tabs.sim.content.style.display !== 'none') {
+          resizeCanvas();
+        }
+      });
+
+      function renderSimulationControls() {
+        const cfg = currentLevelData.simConfig;
+        const container = document.getElementById('simControlsContainer');
+        container.innerHTML = '';
+
+        cfg.controls.forEach(ctrl => {
+          const group = document.createElement('div');
+          group.className = 'control-group';
+          group.innerHTML = `
+            <div class="control-label">
+              <span>${ctrl.label}</span>
+              <span id="label_val_${ctrl.id}">${ctrl.value} ${ctrl.unit}</span>
+            </div>
+            <input type="range" class="control-slider" id="input_${ctrl.id}" 
+              min="${ctrl.min}" max="${ctrl.max}" step="${ctrl.step}" value="${ctrl.value}">
+          `;
+
+          const slider = group.querySelector('input');
+          slider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            cfg.params[ctrl.id] = val;
+            document.getElementById(`label_val_${ctrl.id}`).textContent = `${val} ${ctrl.unit}`;
+            updateSimCalculation();
+          });
+
+          container.appendChild(group);
+        });
+      }
+
+      function updateSimCalculation() {
+        const cfg = currentLevelData.simConfig;
+        const res = cfg.calc(cfg.params);
+
+        document.getElementById('simTelemetry').innerHTML = `
+          ΣF = ${res.sigmaF.toFixed(1)} N<br>
+          a = ${res.a.toFixed(2)} m/s²<br>
+          v = ${simSpeed.toFixed(2)} m/s<br>
+          s = ${(simPositionX / 40).toFixed(1)} m
+        `;
+
+        document.getElementById('simMathStepBox').innerHTML = `
+          <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">Langkah Perhitungan Dinamika Gerak:</div>
+          <div style="white-space:pre-wrap;">${res.formula}</div>
+        `;
+
+        drawCanvas();
+      }
+
+      function resetSimPosition() {
+        simRunning = false;
+        simTime = 0;
+        simSpeed = 0;
+        simPositionX = 50;
+        if (simAnimationId) cancelAnimationFrame(simAnimationId);
+        document.getElementById('btnRunSim').textContent = '▶️ Jalankan Simulasi';
+        updateSimCalculation();
+      }
+
+      document.getElementById('btnRunSim').addEventListener('click', () => {
+        initAudio();
+        playSound('click');
+        simRunning = !simRunning;
+        document.getElementById('btnRunSim').textContent = simRunning ? '⏸️ Jeda Simulasi' : '▶️ Jalankan Simulasi';
+        if (simRunning) {
+          lastFrameTime = performance.now();
+          animateSim();
+        }
+      });
+
+      document.getElementById('btnResetSim').addEventListener('click', () => {
+        playSound('click');
+        resetSimPosition();
+      });
+
+      let lastFrameTime = performance.now();
+
+      function animateSim() {
+        if (!simRunning) return;
+        const now = performance.now();
+        const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+        lastFrameTime = now;
+
+        const cfg = currentLevelData.simConfig;
+        const res = cfg.calc(cfg.params);
+        const a = res.a;
+
+        simSpeed += a * dt;
+        simPositionX += simSpeed * 40 * dt; // 40 pixel per meter
+
+        // Wrap around boundary
+        if (simPositionX > simCanvas.width + 60) {
+          simPositionX = -50;
+        }
+
+        updateSimCalculation();
+        simAnimationId = requestAnimationFrame(animateSim);
+      }
+
+      /* --- CANVAS VISUAL DRAWING PER LEVEL --- */
+      function drawCanvas() {
+        if (!simCanvas.width || !simCanvas.height) return;
+        simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+
+        const w = simCanvas.width;
+        const h = simCanvas.height;
+        const type = currentLevelData.simConfig.type;
+        const p = currentLevelData.simConfig.params;
+
+        if (type === 'inertia' || type === 'cart' || type === 'friction' || type === 'finalBoss') {
+          drawHorizontalTrack(w, h, type, p);
+        } else if (type === 'actionReaction') {
+          drawActionReaction(w, h, p);
+        } else if (type === 'elevator') {
+          drawElevator(w, h, p);
+        } else if (type === 'incline') {
+          drawIncline(w, h, p);
+        } else if (type === 'pulley') {
+          drawPulley(w, h, p);
+        }
+      }
+
+      function drawVectorArrow(x1, y1, x2, y2, color, label) {
+        const headlen = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        simCtx.strokeStyle = color;
+        simCtx.fillStyle = color;
+        simCtx.lineWidth = 3;
+
+        simCtx.beginPath();
+        simCtx.moveTo(x1, y1);
+        simCtx.lineTo(x2, y2);
+        simCtx.stroke();
+
+        simCtx.beginPath();
+        simCtx.moveTo(x2, y2);
+        simCtx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+        simCtx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+        simCtx.closePath();
+        simCtx.fill();
+
+        if (label) {
+          simCtx.font = 'bold 12px system-ui';
+          simCtx.fillText(label, x2 + 8 * Math.cos(angle), y2 + 8 * Math.sin(angle));
+        }
+      }
+
+      function drawHorizontalTrack(w, h, type, p) {
+        const groundY = h - 60;
+
+        // Ground surface
+        simCtx.fillStyle = '#1e293b';
+        simCtx.fillRect(0, groundY, w, 60);
+        simCtx.strokeStyle = '#475569';
+        simCtx.lineWidth = 2;
+        simCtx.beginPath();
+        simCtx.moveTo(0, groundY);
+        simCtx.lineTo(w, groundY);
+        simCtx.stroke();
+
+        // Distance hash marks
+        simCtx.strokeStyle = '#334155';
+        for (let x = 0; x < w; x += 40) {
+          simCtx.beginPath();
+          simCtx.moveTo(x, groundY);
+          simCtx.lineTo(x, groundY + 10);
+          simCtx.stroke();
+        }
+
+        // Box / Block
+        const boxW = 70;
+        const boxH = 50;
+        const boxX = simPositionX;
+        const boxY = groundY - boxH;
+
+        // Shadow
+        simCtx.fillStyle = 'rgba(0,0,0,0.4)';
+        simCtx.fillRect(boxX - 4, groundY - 4, boxW + 8, 4);
+
+        // Box body
+        simCtx.fillStyle = '#0284c7';
+        simCtx.fillRect(boxX, boxY, boxW, boxH);
+        simCtx.strokeStyle = '#38bdf8';
+        simCtx.lineWidth = 2;
+        simCtx.strokeRect(boxX, boxY, boxW, boxH);
+
+        // Mass text
+        simCtx.fillStyle = '#ffffff';
+        simCtx.font = 'bold 13px system-ui';
+        simCtx.textAlign = 'center';
+        simCtx.fillText(`${p.mass || 10} kg`, boxX + boxW / 2, boxY + boxH / 2 + 5);
+
+        // Free Body Diagram (FBD) Vectors from center
+        const cx = boxX + boxW / 2;
+        const cy = boxY + boxH / 2;
+
+        // Gaya Berat w (down)
+        drawVectorArrow(cx, cy, cx, cy + 45, '#3b82f6', 'w=mg');
+
+        // Gaya Normal N (up)
+        drawVectorArrow(cx, cy, cx, cy - 45, '#10b981', 'N');
+
+        // Horizontal forces
+        if (type === 'inertia') {
+          if (p.fRight > 0) drawVectorArrow(cx, cy, cx + p.fRight * 0.9, cy, '#ef4444', `F1=${p.fRight}N`);
+          if (p.fLeft > 0) drawVectorArrow(cx, cy, cx - p.fLeft * 0.9, cy, '#f59e0b', `F2=${p.fLeft}N`);
+        } else if (type === 'cart') {
+          if (p.force > 0) drawVectorArrow(cx, cy, cx + p.force * 0.7, cy, '#ef4444', `F=${p.force}N`);
+        } else if (type === 'friction' || type === 'finalBoss') {
+          const forceVal = p.fPush || p.force || 0;
+          if (forceVal > 0) drawVectorArrow(cx, cy, cx + forceVal * 0.7, cy, '#ef4444', `F=${forceVal}N`);
+          const res = currentLevelData.simConfig.calc(p);
+          const fFric = res.sigmaF < forceVal ? forceVal - res.sigmaF : 0;
+          if (fFric > 0) drawVectorArrow(cx, cy, cx - fFric * 0.7, cy, '#f59e0b', `f=${fFric.toFixed(0)}N`);
+        }
+      }
+
+      function drawActionReaction(w, h, p) {
+        const groundY = h - 60;
+        simCtx.fillStyle = '#1e293b';
+        simCtx.fillRect(0, groundY, w, 60);
+
+        const midX = w / 2;
+        // Skater 1
+        simCtx.fillStyle = '#38bdf8';
+        simCtx.fillRect(midX - 70, groundY - 60, 40, 50);
+        simCtx.fillStyle = '#ffffff';
+        simCtx.font = 'bold 12px system-ui';
+        simCtx.fillText(`m₁=${p.m1}kg`, midX - 50, groundY - 30);
+
+        // Skater 2
+        simCtx.fillStyle = '#ec4899';
+        simCtx.fillRect(midX + 30, groundY - 60, 40, 50);
+        simCtx.fillStyle = '#ffffff';
+        simCtx.fillText(`m₂=${p.m2}kg`, midX + 50, groundY - 30);
+
+        // Interaction vectors
+        drawVectorArrow(midX, groundY - 35, midX + p.pushForce * 0.7, groundY - 35, '#ef4444', `F aksi = +${p.pushForce}N`);
+        drawVectorArrow(midX, groundY - 35, midX - p.pushForce * 0.7, groundY - 35, '#f59e0b', `F reaksi = -${p.pushForce}N`);
+      }
+
+      function drawElevator(w, h, p) {
+        const cx = w / 2;
+        const cy = h / 2 - 10;
+        const elevW = 140;
+        const elevH = 160;
+
+        // Elevator Shaft
+        simCtx.strokeStyle = '#475569';
+        simCtx.lineWidth = 2;
+        simCtx.strokeRect(cx - elevW / 2, cy - elevH / 2, elevW, elevH);
+
+        // Elevator Cable
+        simCtx.beginPath();
+        simCtx.moveTo(cx, 0);
+        simCtx.lineTo(cx, cy - elevH / 2);
+        simCtx.stroke();
+
+        // Scale box inside
+        simCtx.fillStyle = '#334155';
+        simCtx.fillRect(cx - 35, cy + elevH / 2 - 25, 70, 20);
+
+        // Person / Mass
+        simCtx.fillStyle = '#38bdf8';
+        simCtx.fillRect(cx - 20, cy + elevH / 2 - 65, 40, 40);
+        simCtx.fillStyle = '#fff';
+        simCtx.font = 'bold 12px system-ui';
+        simCtx.fillText(`${p.mass} kg`, cx, cy + elevH / 2 - 40);
+
+        // Vectors
+        const res = currentLevelData.simConfig.calc(p);
+        drawVectorArrow(cx, cy, cx, cy + 50, '#3b82f6', `w = ${p.mass * 10}N`);
+        drawVectorArrow(cx, cy, cx, cy - 65, '#10b981', `N = ${res.formula.split('N = ')[1].split(' N')[0]}N`);
+      }
+
+      function drawIncline(w, h, p) {
+        const originX = 60;
+        const originY = h - 50;
+        const length = w - 140;
+        const rad = p.angleDeg * Math.PI / 180;
+        const topX = originX + length * Math.cos(rad);
+        const topY = originY - length * Math.sin(rad);
+
+        // Triangle slope
+        simCtx.fillStyle = '#1e293b';
+        simCtx.beginPath();
+        simCtx.moveTo(originX, originY);
+        simCtx.lineTo(topX, topY);
+        simCtx.lineTo(topX, originY);
+        simCtx.closePath();
+        simCtx.fill();
+        simCtx.strokeStyle = '#64748b';
+        simCtx.lineWidth = 2;
+        simCtx.stroke();
+
+        // Block on incline
+        const boxDist = length * 0.55;
+        const bx = originX + boxDist * Math.cos(rad);
+        const by = originY - boxDist * Math.sin(rad);
+
+        simCtx.save();
+        simCtx.translate(bx, by);
+        simCtx.rotate(-rad);
+
+        simCtx.fillStyle = '#0ea5e9';
+        simCtx.fillRect(-25, -40, 50, 40);
+        simCtx.strokeRect(-25, -40, 50, 40);
+
+        // FBD on incline
+        drawVectorArrow(0, -20, 0, -65, '#10b981', 'N');
+        drawVectorArrow(0, -20, -45, -20, '#ef4444', 'mg sin θ');
+        drawVectorArrow(0, -20, 35, -20, '#f59e0b', 'f gesek');
+        simCtx.restore();
+
+        // Gravitasi murni ke bawah dari pusat balok
+        drawVectorArrow(bx, by - 20, bx, by + 45, '#3b82f6', 'w = mg');
+      }
+
+      function drawPulley(w, h, p) {
+        const tableY = h - 100;
+        const tableW = w * 0.55;
+
+        // Table
+        simCtx.fillStyle = '#1e293b';
+        simCtx.fillRect(40, tableY, tableW, 20);
+        simCtx.fillRect(tableW + 30, tableY, 15, 100);
+
+        // Pulley circle at corner
+        const px = 40 + tableW;
+        const py = tableY;
+        simCtx.fillStyle = '#64748b';
+        simCtx.beginPath();
+        simCtx.arc(px, py, 14, 0, Math.PI * 2);
+        simCtx.fill();
+
+        // Block 1 on table
+        const b1x = 120;
+        const b1y = tableY - 40;
+        simCtx.fillStyle = '#0284c7';
+        simCtx.fillRect(b1x, b1y, 50, 40);
+        simCtx.fillStyle = '#fff';
+        simCtx.font = 'bold 11px system-ui';
+        simCtx.fillText(`m₁=${p.m1}kg`, b1x + 25, b1y + 24);
+
+        // Block 2 hanging
+        const b2x = px + 14;
+        const b2y = py + 50;
+        simCtx.fillStyle = '#ec4899';
+        simCtx.fillRect(b2x - 20, b2y, 40, 40);
+        simCtx.fillStyle = '#fff';
+        simCtx.fillText(`m₂=${p.m2}kg`, b2x, b2y + 24);
+
+        // Strings
+        simCtx.strokeStyle = '#8b5cf6';
+        simCtx.lineWidth = 3;
+        simCtx.beginPath();
+        simCtx.moveTo(b1x + 50, b1y + 20);
+        simCtx.lineTo(px, py - 14);
+        simCtx.stroke();
+
+        simCtx.beginPath();
+        simCtx.moveTo(px + 14, py);
+        simCtx.lineTo(b2x, b2y);
+        simCtx.stroke();
+
+        // Tension vector
+        drawVectorArrow(b1x + 50, b1y + 20, b1x + 95, b1y + 20, '#8b5cf6', 'T');
+        drawVectorArrow(b2x, b2y, b2x, b2y - 30, '#8b5cf6', 'T');
+        drawVectorArrow(b2x, b2y + 40, b2x, b2y + 75, '#3b82f6', 'w₂=m₂g');
+      }
+
+      /* --- CHALLENGE & EVALUATION ENGINE --- */
+      function renderChallengeSection() {
+        const c = currentLevelData.challenge;
+        document.getElementById('challengeScenarioText').textContent = c.scenario;
+        const area = document.getElementById('challengeInteractionArea');
+        area.innerHTML = '';
+
+        const fb = document.getElementById('challengeFeedback');
+        fb.style.display = 'none';
+        document.getElementById('btnNextLevel').style.display = 'none';
+
+        if (c.type === 'choice') {
+          const list = document.createElement('div');
+          list.className = 'quiz-options';
+          c.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span style="font-weight:700; color:var(--primary);">${String.fromCharCode(65 + idx)}.</span> <span>${opt.text}</span>`;
+            btn.addEventListener('click', () => {
+              evaluateChallengeChoice(idx);
+            });
+            list.appendChild(btn);
+          });
+          area.appendChild(list);
+        } else if (c.type === 'numeric') {
+          const form = document.createElement('div');
+          form.style.display = 'flex';
+          form.style.gap = '10px';
+          form.style.maxWidth = '360px';
+          form.innerHTML = `
+            <input type="number" step="any" class="control-input" id="numAnswerInput" placeholder="Ketik nilai angka (${c.unit})...">
+            <button class="btn btn-primary" id="btnSubmitNumeric" style="min-width:120px;">Kirim Jawaban</button>
+          `;
+          area.appendChild(form);
+
+          form.querySelector('#btnSubmitNumeric').addEventListener('click', () => {
+            const val = parseFloat(document.getElementById('numAnswerInput').value);
+            evaluateChallengeNumeric(val);
+          });
+        }
+      }
+
+      function evaluateChallengeChoice(idx) {
+        const c = currentLevelData.challenge;
+        const opt = c.options[idx];
+        const buttons = document.querySelectorAll('#challengeInteractionArea .option-btn');
+        buttons.forEach((b, i) => {
+          b.className = 'option-btn';
+          if (i === idx) {
+            b.classList.add(opt.correct ? 'correct' : 'incorrect');
+          }
+        });
+
+        if (opt.correct) {
+          handleSuccessChallenge(c.explanation);
+        } else {
+          handleFailedChallenge();
+        }
+      }
+
+      function evaluateChallengeNumeric(val) {
+        const c = currentLevelData.challenge;
+        if (isNaN(val)) {
+          showToast('Masukkan angka jawaban terlebih dahulu!');
+          return;
+        }
+
+        const isCorrect = Math.abs(val - c.correctValue) < 0.15;
+        if (isCorrect) {
+          handleSuccessChallenge(c.explanation);
+        } else {
+          handleFailedChallenge();
+        }
+      }
+
+      function handleSuccessChallenge(msg) {
+        playSound('success');
+        const fb = document.getElementById('challengeFeedback');
+        fb.style.display = 'block';
+        fb.className = 'feedback-banner feedback-success';
+        fb.innerHTML = `<strong>Tepat Sekali!</strong> ${msg}`;
+
+        // Add XP and unlock next level
+        if (!gameState.completedLevels.includes(currentLevelData.id)) {
+          gameState.completedLevels.push(currentLevelData.id);
+          gameState.xp += 150;
+        }
+
+        if (currentLevelData.id === gameState.unlockedLevel && gameState.unlockedLevel < levelsData.length) {
+          gameState.unlockedLevel++;
+        }
+
+        saveGame();
+        document.getElementById('btnNextLevel').style.display = 'inline-flex';
+      }
+
+      function handleFailedChallenge() {
+        playSound('error');
+        const fb = document.getElementById('challengeFeedback');
+        fb.style.display = 'block';
+        fb.className = 'feedback-banner feedback-error';
+        fb.innerHTML = `<strong>Jawaban Belum Tepat.</strong> Analisis kembali diagram vektor dan rumus gaya yang bersesuaian. Coba periksa tombol 'Bantuan Petunjuk'.`;
+
+        gameState.hearts = Math.max(0, gameState.hearts - 1);
+        saveGame();
+
+        if (gameState.hearts === 0) {
+          openModal(
+            'Nyawa Penjelajah Habis!',
+            'Kamu kehabisan nyawa penjelajah. Nyawa diisi ulang kembali ke 3 agar kamu dapat mengulang dan memahami konsep dengan seksama.',
+            () => {
+              gameState.hearts = 3;
+              saveGame();
+            }
+          );
+        }
+      }
+
+      document.getElementById('btnShowHint').addEventListener('click', () => {
+        playSound('click');
+        openModal(
+          '💡 Petunjuk Fisika',
+          currentLevelData.challenge.hint,
+          null
+        );
+      });
+
+      document.getElementById('btnNextLevel').addEventListener('click', () => {
+        playSound('click');
+        if (currentLevelData.id >= levelsData.length) {
+          switchView('final');
+        } else {
+          openLevel(currentLevelData.id + 1);
+        }
+      });
+
+      /* --- FINAL SCREEN --- */
+      function renderFinalScreen() {
+        document.getElementById('finalScoreXP').textContent = gameState.xp + ' XP';
+        document.getElementById('finalHearts').textContent = gameState.hearts + ' / 3';
+        document.getElementById('finalRankBadge').textContent = gameState.xp >= 1000 ? 'Master Penjelajah Riset Dinamika 🏆' : 'Penjelajah Muda Newton 🏅';
+      }
+
+      document.getElementById('btnFinalBackMap').addEventListener('click', () => switchView('map'));
+      document.getElementById('btnFinalReplay').addEventListener('click', () => {
+        openModal('Ulangi Seluruh Petualangan?', 'Progress akan disetel ulang dari Level 1 untuk memulai kembali ekspedisi.', () => {
+          gameState = { ...defaultState };
+          saveGame();
+          switchView('map');
+        });
+      });
+
+      /* --- NAVIGATION & GENERAL BUTTONS --- */
+      document.getElementById('btnStartAdventure').addEventListener('click', () => switchView('map'));
+      document.getElementById('btnBackToHero').addEventListener('click', () => switchView('hero'));
+      document.getElementById('btnReturnToMap').addEventListener('click', () => switchView('map'));
+
+      document.getElementById('btnToggleSound').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        gameState.sound = soundEnabled;
+        saveGame();
+        showToast(soundEnabled ? 'Suara Aktif' : 'Suara Dimatikan');
+        playSound('click');
+      });
+
+      document.getElementById('btnResetAll').addEventListener('click', () => {
+        openModal(
+          'Reset Semua Progres?',
+          'Apakah kamu yakin ingin menghapus seluruh level yang terbuka, skor XP, dan progres petualangan?',
+          () => {
+            localStorage.removeItem(STORAGE_KEY);
+            gameState = { ...defaultState };
+            saveGame();
+            showToast('Seluruh progres telah direset!');
+            switchView('map');
+          }
+        );
+      });
+
+      /* --- MODAL SYSTEM --- */
+      const confirmModal = document.getElementById('confirmModal');
+      const btnModalCancel = document.getElementById('btnModalCancel');
+      const btnModalConfirm = document.getElementById('btnModalConfirm');
+      let currentModalCallback = null;
+
+      function openModal(title, msg, onConfirm) {
+        initAudio();
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = msg;
+        currentModalCallback = onConfirm;
+
+        if (!onConfirm) {
+          btnModalConfirm.style.display = 'none';
+          btnModalCancel.textContent = 'Tutup';
+        } else {
+          btnModalConfirm.style.display = 'inline-flex';
+          btnModalCancel.textContent = 'Batal';
+        }
+
+        confirmModal.classList.add('show');
+      }
+
+      btnModalCancel.addEventListener('click', () => {
+        playSound('click');
+        confirmModal.classList.remove('show');
+      });
+
+      btnModalConfirm.addEventListener('click', () => {
+        playSound('click');
+        confirmModal.classList.remove('show');
+        if (currentModalCallback) currentModalCallback();
+      });
+
+      /* --- INITIALIZATION --- */
+      loadGame();
+    })();
+  </script>
+</body>
+</html>
